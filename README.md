@@ -1,11 +1,11 @@
 
 ## Contents
 
-- 1) Introduction
-- 2) Design & Implementation of the Database
+- 1. Introduction
+- 2. Design & Implementation of the Database
    - 2.a EER Diagram
    - 2.b MS SQL Scripts
-- 3) Implementation of the API
+- 3. Implementation of the API
 
 <br />
 
