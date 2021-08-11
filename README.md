@@ -40,7 +40,7 @@ I emphasize that the database will respond to the contraints, but the user will 
 
 A very small database has been thought of as my first start in the web APIs, it would be a database that would be used by hospital receptionists.
 
-![](img/eer.jpeg)
+![](images/eer.jpeg)
 
 As you can see, it will only give priority to doctors and nurses in this database, information on other types of workers will not be taken into account.
 
@@ -64,7 +64,7 @@ Some logic triggers were also added.
 First with the EF the DBcontext and the respective classes to the SQL tables were generated.
 In the DBContext you can change the DB Connection string.
 
-![](img/dbcontext.png)
+![](images/dbcontext.png)
 
 Later the controllers of the tables were generated to be able to make the HTTP requests later.
 
