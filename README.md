@@ -13,7 +13,7 @@
 
 In this project I have tried to understand the operation of web apis using a small database which emulates being a hospital database.
 
-For the development of the project, MS SQL, ASP.NET Core Blazor and Radzen Blazor components have been used.
+For the development of the project, MS SQL, ASP.NET Core Blazor, Radzen Blazor components and Entity Framework have been used.
 
 For now the only thing missing from this project are the validations of the forms taking into account the foreing keys and primary keys 
 contraints, for now the user will not be notified about this type of errors.
@@ -60,7 +60,7 @@ Some logic triggers were also added.
 
 ## 3) Implementation of the API
 
-First with the EF the DBcontext and the respective classes to the SQL tables were generated.
+First with the entity framework the DBcontext and the respective classes to the SQL tables were generated.
 In the DBContext you can change the DB Connection string.
 
 ![](images/dbcontext.png)
