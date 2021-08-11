@@ -8,7 +8,6 @@
 - 3) Implementation of the API
 
 <br />
-<br />
 
 ## 1) Introduction
 
