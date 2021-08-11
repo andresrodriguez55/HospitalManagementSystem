@@ -1,0 +1,158 @@
+﻿@page "/rooms"
+@using API.Shared
+@using API.Shared.Models
+@inject HttpClient Http
+
+<h1>Rooms</h1>
+
+<hr />
+
+<table width="100%" style="background: #447778; color: honeydew">
+    <tr>
+        <td width="20"> </td>
+        <td>
+            <h2> Add New Room Details</h2>
+        </td>
+        <td> </td>
+        <td align="right">
+            <button class="btn btn-info" style="background: #76b1b3;" @onclick="ResetFields">Reset</button>
+        </td>
+        <td width="10"> </td>
+    </tr>
+    <tr>
+        <td colspan="2"></td>
+    </tr>
+</table>
+
+<hr />
+
+<RadzenCard>
+    <EditForm Model="@room">
+        <DataAnnotationsValidator />
+        <table class="form-group">
+            <tr>
+                <td>
+                    <label for="Name" class="control-label">Room ID<span style="color: red">*</span></label>
+                </td>
+
+                <td>
+                    <InputText class="form-control" @bind-Value="room.RoomId" />
+                    <ValidationMessage For="@(()=>room.RoomId)" />
+                </td>
+
+                <td width="20"> </td>
+
+                <td>
+                    <label for="Name" class="control-label">Capacity<span style="color: red">*</span></label>
+                </td>
+
+                <td>
+                    <InputNumber class="form-control" @bind-Value="room.Rcapacity" />
+                    <ValidationMessage For="@(()=>room.Rcapacity)" />
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <label for="Name" class="control-label">Type<span style="color: red">*</span></label>
+                </td>
+
+                <td>
+                    <InputText class="form-control" @bind-Value="room.Rtype" />
+                    <ValidationMessage For="@(()=>room.Rtype)" />
+                </td>
+
+                <td width="20"> </td>
+                <td></td>
+                <td>
+                    <button type="submit" class="btn btn-success" @onclick="(() => AddRoom())" style="width: 220px; background: #4e8a58;">Save</button>
+                </td>
+            </tr>
+        </table>
+    </EditForm>
+</RadzenCard>
+
+<hr/>
+
+<table width="100%" style="background: #447778; color: honeydew">
+    <tr>
+        <td width="20"> </td>
+        <td>
+            <h2>Rooms Details</h2>
+        </td>
+
+    </tr>
+    <tr>
+        <td colspan="2"></td>
+    </tr>
+</table>
+
+@if (rooms_array == null)
+{
+    <p><em>Loading...</em></p>
+}
+
+else
+{
+    <RadzenGrid AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterMode="FilterMode.Advanced"
+                AllowPaging="true" PageSize="4" AllowSorting="true" Data="rooms_array" TItem="Room" Style="width: auto">
+        <Columns>
+            <RadzenGridColumn TItem="Room" Property="RoomId" Title="ID" />
+            <RadzenGridColumn TItem="Room" Property="Rcapacity" Title="Capacity" />
+            <RadzenGridColumn TItem="Room" Property="Rtype" Title="Type" />
+            <RadzenGridColumn TItem="Room" Title="Edit">
+                <Template Context="r">
+                    <RadzenButton Click=@(() => EditRoom(r.RoomId)) Text="Edit" ButtonStyle="ButtonStyle.Warning" Style="margin-bottom: 5px;" />
+                </Template>
+            </RadzenGridColumn>
+            <RadzenGridColumn TItem="Room" Title="Delete">
+                <Template Context="r">
+                    <RadzenButton Click=@(() => DeleteRoom(r.RoomId)) Text="Delete" ButtonStyle="ButtonStyle.Danger" Style="margin-bottom: 5px;" />
+                </Template>
+            </RadzenGridColumn>
+        </Columns>
+    </RadzenGrid>
+}
+
+@code
+{
+    private Room[] rooms_array;
+    Room room = new Room();
+    bool it_is_going_to_update=false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        rooms_array = await Http.GetFromJsonAsync<Room[]>("api/Rooms");
+    }
+
+    void ResetFields()
+    {
+        room = new Room();
+        it_is_going_to_update = false;
+    }
+
+    protected async Task AddRoom()
+    {
+        if(it_is_going_to_update==false)
+            await Http.PostAsJsonAsync("api/Rooms", room);
+        else
+            await Http.PutAsJsonAsync("api/Rooms/"+ room.RoomId, room);
+
+        ResetFields();
+        rooms_array = await Http.GetFromJsonAsync<Room[]>("api/Rooms");
+        it_is_going_to_update = false;
+    }
+
+    protected async Task EditRoom(string roomID)
+    {
+        room = await Http.GetFromJsonAsync<Room>("api/Rooms/" + roomID);
+        it_is_going_to_update = true;
+    }
+
+    protected async Task DeleteRoom(string roomID)
+    {
+        await Http.DeleteAsync("api/Rooms/" + roomID);
+        rooms_array = await Http.GetFromJsonAsync<Room[]>("api/Rooms");
+        it_is_going_to_update = false;
+    }
+}

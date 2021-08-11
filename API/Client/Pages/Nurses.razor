@@ -1,0 +1,148 @@
+﻿@page "/nurses"
+@using API.Shared
+@using API.Shared.Models
+@inject HttpClient Http
+
+<h1>Nurses</h1>
+
+<hr />
+
+<table width="100%" style="background: #447778; color: honeydew">
+    <tr>
+        <td width="20"> </td>
+        <td>
+            <h2> Add New Nurse Details</h2>
+        </td>
+        <td> </td>
+        <td align="right">
+            <button class="btn btn-info" style="background: #76b1b3;" @onclick="ResetFields">Reset</button>
+        </td>
+        <td width="10"> </td>
+    </tr>
+    <tr>
+        <td colspan="2"></td>
+    </tr>
+</table>
+
+<hr />
+
+<RadzenCard>
+    <EditForm Model="@nurse">
+        <DataAnnotationsValidator />
+        <table class="form-group">
+            <tr>
+                <td>
+                    <label for="Name" class="control-label">Worker ID<span style="color: red">*</span></label>
+                </td>
+
+                <td>
+                    <InputNumber class="form-control" @bind-Value="nurse.WorkerId" />
+                    <ValidationMessage For="@(()=>nurse.WorkerId)" />
+                </td>
+
+                <td width="20"> </td>
+
+                <td>
+                    <label for="Name" class="control-label">Room ID</label>
+                </td>
+
+                <td>
+                    <InputText class="form-control" @bind-Value="nurse.RoomId" />
+                    <ValidationMessage For="@(()=>nurse.RoomId)" />
+                </td>
+            </tr>
+
+            <tr height=5px></tr>
+            <tr>
+                <td></td>
+                <td>
+                    <button type="submit" class="btn btn-success" @onclick="(() => AddNurse())" style="width: 220px; background: #4e8a58;">Save</button>
+                </td>
+            </tr>
+        </table>
+    </EditForm>
+</RadzenCard>
+
+<hr/>
+
+<table width="100%" style="background: #447778; color: honeydew">
+    <tr>
+        <td width="20"> </td>
+        <td>
+            <h2>Nurses Details</h2>
+        </td>
+
+    </tr>
+    <tr>
+        <td colspan="2"></td>
+    </tr>
+</table>
+
+@if (nurses_array == null)
+{
+    <p><em>Loading...</em></p>
+}
+
+else
+{
+    <RadzenGrid AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterMode="FilterMode.Advanced"
+                AllowPaging="true" PageSize="4" AllowSorting="true" Data="nurses_array" TItem="Nurse" Style="width: auto">
+        <Columns>
+            <RadzenGridColumn TItem="Nurse" Property="WorkerId" Title="ID" />
+            <RadzenGridColumn TItem="Nurse" Property="RoomId" Title="Room ID" />
+            <RadzenGridColumn TItem="Nurse" Title="Edit">
+                <Template Context="n">
+                    <RadzenButton Click=@(() => EditNurse(n.WorkerId)) Text="Edit" ButtonStyle="ButtonStyle.Warning" Style="margin-bottom: 20px; width: 150px" />
+                </Template>
+            </RadzenGridColumn>
+            <RadzenGridColumn TItem="Nurse" Title="Delete">
+                <Template Context="n">
+                    <RadzenButton Click=@(() => DeleteNurse(n.WorkerId)) Text="Delete" ButtonStyle="ButtonStyle.Danger" Style="margin-bottom: 20px; width: 150px" />
+                </Template>
+            </RadzenGridColumn>
+        </Columns>
+    </RadzenGrid>
+}
+
+@code
+{
+    private Nurse[] nurses_array;
+    Nurse nurse = new Nurse();
+    bool it_is_going_to_update=false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        nurses_array = await Http.GetFromJsonAsync<Nurse[]>("api/Nurses");
+    }
+
+    void ResetFields()
+    {
+        nurse = new Nurse();
+        it_is_going_to_update = false;
+    }
+
+    protected async Task AddNurse()
+    {
+        if(it_is_going_to_update == false)
+            await Http.PostAsJsonAsync("api/Nurses", nurse);
+        else
+            await Http.PutAsJsonAsync("api/Nurses/"+ nurse.WorkerId.ToString(), nurse);
+
+        ResetFields();
+        nurses_array = await Http.GetFromJsonAsync<Nurse[]>("api/Nurses");
+        it_is_going_to_update = false;
+    }
+
+    protected async Task EditNurse(int workerID)
+    {
+        nurse = await Http.GetFromJsonAsync<Nurse>("api/Nurses/" + Convert.ToInt32(workerID));
+        it_is_going_to_update = true;
+    }
+
+    protected async Task DeleteNurse(int workerID)
+    {
+        await Http.DeleteAsync("api/Nurses/" + Convert.ToInt32(workerID));
+        nurses_array = await Http.GetFromJsonAsync<Nurse[]>("api/Nurses");
+        it_is_going_to_update = false;
+    }
+}

@@ -1,0 +1,230 @@
+﻿@page "/workers"
+@using API.Shared
+@using API.Shared.Models
+@inject HttpClient Http
+
+<h1>Workers</h1>
+
+<hr />
+
+<table width="100%" style="background: #447778; color: honeydew ">
+    <tr>
+        <td width="20"> </td>
+        <td>
+            <h2> Add New Worker Details</h2>
+        </td>
+        <td> </td>
+        <td align="right">
+            <button class="btn btn-info" style="background: #76b1b3;" @onclick="ResetFields">Reset</button>
+        </td>
+        <td width="10"> </td>
+    </tr>
+    <tr>
+        <td colspan="2"></td>
+    </tr>
+</table>
+
+<hr />
+
+<RadzenCard>
+    <EditForm Model="@worker">
+        <DataAnnotationsValidator />
+        <table class="form-group">
+            <tr>
+                <td>
+                    <label for="Name" class="control-label">Worker ID<span style="color: red">*</span></label>
+                </td>
+
+                <td>
+                    <InputNumber class="form-control" @bind-Value="worker.WorkerId" />
+                    <ValidationMessage For="@(()=>worker.WorkerId)" />
+                </td>
+
+                <td width="20"> </td>
+
+                <td>
+                    <label for="Name" class="control-label">Sex<span style="color: red">*</span></label>
+                </td>
+
+                <td>
+                    <InputSelect class="form-control" @bind-Value="worker.Wsex">
+                        <option value="W">Woman</option>
+                        <option value="M">Man</option>
+                    </InputSelect>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <label for="Name" class="control-label">First Name<span style="color: red">*</span></label>
+                </td>
+
+                <td>
+                    <InputText class="form-control" @bind-Value="worker.WfirstName" />
+                    <ValidationMessage For="@(()=>worker.WfirstName)" />
+                </td>
+
+                <td width="20"> </td>
+
+                <td>
+                    <label for="Name" class="control-label">Last Name<span style="color: red">*</span></label>
+                </td>
+
+                <td>
+                    <InputText class="form-control" @bind-Value="worker.WlastName" />
+                    <ValidationMessage For="@(()=>worker.WlastName)" />
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <label for="Name" class="control-label">Phone Number<span style="color: red">*</span></label>
+                </td>
+
+                <td>
+                    <InputNumber class="form-control" @bind-Value="worker.WphoneNumber" />
+                </td>
+
+                <td width="20"> </td>
+
+                <td>
+                    <label for="Name" class="control-label">City</label>
+                </td>
+
+                <td>
+                    <InputText class="form-control" @bind-Value="worker.Wcity" />
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <label for="Name" class="control-label">Number</label>
+                </td>
+
+                <td>
+                    <InputNumber class="form-control" @bind-Value="worker.Wnumber" />
+                </td>
+
+                <td width="20"> </td>
+
+                <td>
+                    <label for="Name" class="control-label">Postcode</label>
+                </td>
+
+                <td>
+                    <InputText class="form-control" @bind-Value="worker.WpostCode" />
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <label for="Name" class="control-label">Street</label>
+                </td>
+
+                <td>
+                    <InputText class="form-control" @bind-Value="worker.Wstreet" />
+                </td>
+
+                <td width="20"> </td>
+                <td></td>
+                <td>
+                    <button type="submit" class="btn btn-success" @onclick="(() => AddWorker())" style="width: 220px; background: #4e8a58; ">Save</button>
+                </td>
+            </tr>
+        </table>
+    </EditForm>
+</RadzenCard>
+
+<hr/>
+
+<table width="100%" style="background: #447778; color: honeydew ">
+    <tr>
+        <td width="20"> </td>
+        <td>
+            <h2>Workers Details</h2>
+        </td>
+
+    </tr>
+    <tr>
+        <td colspan="2"></td>
+    </tr>
+</table>
+
+@if (workers_array == null)
+{
+    <p><em>Loading...</em></p>
+}
+
+else
+{
+    <RadzenGrid Responsive="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterMode="FilterMode.Advanced" AllowColumnResize="true"
+                AllowPaging="true" PageSize="4" AllowSorting="true" Data="workers_array" TItem="Worker" Style="width: auto">
+        <Columns>
+            <RadzenGridColumn TItem="Worker" Property="WorkerId" Title="ID" />
+            <RadzenGridColumn TItem="Worker" Property="Wsex" Title="Sex" />
+            <RadzenGridColumn TItem="Worker" Property="WfirstName" Title="First Name" />
+            <RadzenGridColumn TItem="Worker" Property="WlastName" Title="Last Name" />
+            <RadzenGridColumn TItem="Worker" Property="WphoneNumber" Title="Phone Number" />
+            <RadzenGridColumn TItem="Worker" Property="Wcity" Title="City" />
+            <RadzenGridColumn TItem="Worker" Property="Wnumber" Title="Number" />
+            <RadzenGridColumn TItem="Worker" Property="WpostCode" Title="Postcode" />
+            <RadzenGridColumn TItem="Worker" Property="Wstreet" Title="Street" />
+            <RadzenGridColumn TItem="Worker" Title="Edit">
+                <Template Context="w">
+                    <RadzenButton Click=@(() => EditWorker(w.WorkerId)) Text="Edit" ButtonStyle="ButtonStyle.Warning" Style=" margin-bottom: 5px;" />
+                </Template>
+            </RadzenGridColumn>
+            <RadzenGridColumn TItem="Worker" Title="Delete">
+                <Template Context="w">
+                    <RadzenButton Click=@(() => DeleteWorker(w.WorkerId)) Text="Delete" ButtonStyle="ButtonStyle.Danger" Style="margin-bottom: 5px;" />
+                </Template>
+            </RadzenGridColumn>
+        </Columns>
+    </RadzenGrid>
+}
+
+@code
+{
+    private Worker[] workers_array;
+    Worker worker = new Worker();
+    bool it_is_going_to_update = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        workers_array = await Http.GetFromJsonAsync<Worker[]>("api/Workers");
+    }
+
+    void ResetFields()
+    {
+        worker = new Worker();
+        it_is_going_to_update = false;
+    }
+
+    protected async Task AddWorker()
+    {
+        if (it_is_going_to_update==false)
+            await Http.PostAsJsonAsync("api/Workers/", worker);
+
+        else
+            await Http.PutAsJsonAsync("api/Workers/"+ worker.WorkerId.ToString(), worker);
+
+        ResetFields();
+        workers_array = await Http.GetFromJsonAsync<Worker[]>("api/Workers");
+    }
+
+    protected async Task EditWorker(int workerID)
+    {
+        worker = await Http.GetFromJsonAsync<Worker>("api/Workers/" + workerID.ToString());
+        it_is_going_to_update = true;
+    }
+
+    // Delte Method
+    protected async Task DeleteWorker(int workerID)
+    {
+        await Http.DeleteAsync("api/Workers/" + Convert.ToInt16(workerID));
+        workers_array = await Http.GetFromJsonAsync<Worker[]>("api/Workers");
+        it_is_going_to_update = false;
+    }
+
+
+}

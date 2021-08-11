@@ -1,0 +1,222 @@
+﻿@page "/"
+@using API.Shared
+@using API.Shared.Models
+@inject HttpClient Http
+
+<h1>Statistics</h1>
+<hr />
+
+<RadzenCard>
+    <div class="row">
+        <div class="col-sm">
+            <h3 align="center">Number of Patients by Date</h3>
+            <RadzenChart>
+                <RadzenLineSeries Smooth="@true" Data="@patient_info_array" CategoryProperty="date" Title="Patients Count" LineType="LineType.Dashed" ValueProperty="count">
+                    <RadzenMarkers MarkerType="MarkerType.Square" />
+                </RadzenLineSeries>
+                <RadzenCategoryAxis Padding="20" FormatString="{0:dd-MM-yy}" />
+                <RadzenLegend Visible="false" />
+            </RadzenChart>
+        </div>
+
+        <hr width="1" size="500">
+
+        <div class="col-sm">
+            <h3 align="center">Rooms Capacities Status</h3>
+            <RadzenChart>
+                <RadzenColumnSeries Data="@rooms_array" CategoryProperty="RoomId" Title="Capacity of Room" LineType="LineType.Dashed" ValueProperty="Rcapacity" />
+                <RadzenColumnSeries Data="@room_info_array" CategoryProperty="room_id" Title="People in Room" ValueProperty="count" />
+                <RadzenValueAxis>
+                    <RadzenGridLines Visible="true" />
+                </RadzenValueAxis>
+            </RadzenChart>
+        </div>
+    </div>
+
+    <hr width="1" size="500">
+
+    <div class="row">
+        <div class="col-sm">
+            <h3 align="center">Number of Patients Treated by Each Doctor</h3>
+            <RadzenChart>
+                <RadzenColumnSeries Data="@doctor_info_array" CategoryProperty="id" Title="Number of Patients Treated" LineType="LineType.Dashed" ValueProperty="patient_count" />
+                <RadzenColumnOptions Radius="30" />
+                <RadzenCategoryAxis>
+                    <RadzenAxisTitle Text="Doctor ID" />
+                </RadzenCategoryAxis>
+                <RadzenLegend Visible="false" />
+            </RadzenChart>
+        </div>
+
+        <hr width="1" size="500">
+
+        <div class="col-sm">
+            <h3 align="center">Percentage of Professions</h3>
+            <RadzenChart>
+                <RadzenPieSeries Data="@worker_info_array" Title="Count" CategoryProperty="profession" ValueProperty="count" />
+            </RadzenChart>
+        </div>
+    </div>
+</RadzenCard>
+
+@code
+{
+    class WorkerInfo
+    {
+        public WorkerInfo(string profession, int count) { this.profession = profession; this.count = count; }
+        public string profession { get; set; }
+        public int count { get; set; }
+    }
+
+    class DoctorInfo
+    {
+        public DoctorInfo(string? id, int patient_count) { this.id = id; this.patient_count = patient_count; }
+        public string? id { get; set; }
+        public int patient_count { get; set; }
+    }
+
+    class PatientInfo
+    {
+        public PatientInfo(DateTime? date, int count) { this.date = date; this.count = count; }
+        public DateTime? date { get; set; }
+        public int count { get; set; }
+    }
+
+    class RoomInfo
+    {
+        public RoomInfo(string? room_id, int count) { this.room_id = room_id; this.count = count; }
+        public string? room_id { get; set; }
+        public int count { get; set; }
+    }
+
+    Patient[] patients_array;
+    Room[] rooms_array;
+    Doctor[] doctors_array;
+    Nurse[] nurses_array;
+    Worker[] workers_array;
+
+    WorkerInfo[] worker_info_array;
+    PatientInfo[] patient_info_array;
+    RoomInfo[] room_info_array;
+    DoctorInfo[] doctor_info_array;
+
+    protected override async Task OnInitializedAsync()
+    {
+        patients_array = await Http.GetFromJsonAsync<Patient[]>("api/Patients");
+        rooms_array = await Http.GetFromJsonAsync<Room[]>("api/Rooms");
+        doctors_array = await Http.GetFromJsonAsync<Doctor[]>("api/Doctors");
+        nurses_array = await Http.GetFromJsonAsync<Nurse[]>("api/Nurses");
+        workers_array = await Http.GetFromJsonAsync<Worker[]>("api/Workers");
+
+        worker_info_array = new WorkerInfo[] {
+                                                new WorkerInfo("Doctor", doctors_array.Length),
+                                                new WorkerInfo("Nurse", nurses_array.Length),
+                                                new WorkerInfo("Other", workers_array.Length-doctors_array.Length-nurses_array.Length)
+                                            };
+
+        patients_array = patients_array.OrderBy(p => p.PentryDate).ToArray();
+        int temp_count = 1;
+        DateTime? temp_date = patients_array[0].PentryDate;
+        List<PatientInfo> patients_info_list = new List<PatientInfo>();
+        int length_array = patients_array.Length;
+        for (int index = 1; index < length_array; index++)
+        {
+            if (temp_date != null)
+            {
+                if (DateTime.Compare((DateTime)patients_array[index].PentryDate, (DateTime)temp_date) == 0)
+                    temp_count++;
+                else
+                {
+                    patients_info_list.Add(new PatientInfo(temp_date, temp_count));
+                    temp_date = patients_array[index].PentryDate;
+                    temp_count = 1;
+                }
+            }
+
+            else
+            {
+                if (patients_array[index].PentryDate == null)
+                    temp_count++;
+                else
+                {
+                    patients_info_list.Add(new PatientInfo(temp_date, temp_count));
+                    temp_date = patients_array[index].PentryDate;
+                    temp_count = 1;
+                }
+            }
+        }
+        patients_info_list.Add(new PatientInfo(temp_date, temp_count));
+        patient_info_array = patients_info_list.ToArray();
+
+
+        patients_array = patients_array.OrderBy(p => p.RoomId).ToArray();
+        temp_count = 1;
+        string? temp_room_id = patients_array[0].RoomId;
+        List<RoomInfo> rooms_info_list = new List<RoomInfo>();
+        //length_array = patients_array.Length;
+        for (int index = 1; index < length_array; index++)
+        {
+            if (temp_room_id != null)
+            {
+                if (temp_room_id == patients_array[index].RoomId)
+                    temp_count++;
+                else
+                {
+                    rooms_info_list.Add(new RoomInfo(temp_room_id, temp_count));
+                    temp_room_id = patients_array[index].RoomId;
+                    temp_count = 1;
+                }
+            }
+
+            else
+            {
+                if (patients_array[index].RoomId != null)
+                {
+                    temp_room_id = patients_array[index].RoomId;
+                    temp_count = 1;
+                }
+            }
+        }
+        rooms_info_list.Add(new RoomInfo(temp_room_id, temp_count));
+        room_info_array = rooms_info_list.ToArray();
+
+
+
+
+        patients_array = patients_array.OrderBy(p => p.WorkerId).ToArray();
+        temp_count = 1;
+        string? temp_id = patients_array[0].WorkerId.ToString();
+        List<DoctorInfo> doctors_info_list = new List<DoctorInfo>();
+        //length_array = patients_array.Length;
+        for (int index = 1; index < length_array; index++)
+        {
+            if (temp_id != "")
+            {
+                if (temp_id == patients_array[index].WorkerId.ToString())
+                    temp_count++;
+                else
+                {
+                    doctors_info_list.Add(new DoctorInfo(temp_id, temp_count));
+                    temp_id = patients_array[index].WorkerId.ToString();
+                    temp_count = 1;
+                }
+            }
+
+            else
+            {
+                if (patients_array[index].WorkerId.ToString() != "")
+                {
+                    doctors_info_list.Add(new DoctorInfo("Not Attended", temp_count));
+                    temp_id = patients_array[index].WorkerId.ToString();
+                    temp_count = 1;
+                }
+
+                else
+                    temp_count++;
+            }
+        }
+        doctors_info_list.Add(new DoctorInfo(temp_id, temp_count));
+        doctor_info_array = doctors_info_list.ToArray();
+
+    }
+}
