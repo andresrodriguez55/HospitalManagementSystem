@@ -21,14 +21,12 @@ I emphasize that the database will respond to the contraints, but the user will 
 
 ## Screenshots
 
-| ![](images/1.png) | ![](images/2.png) | 
-|:---:|:---:|
-
-![](images/3.png) | ![](images/4.png) |
-|:---:|:---:|
-
-![](images/5.png) | ![](images/6.png) |
-|:---:|:---:|
+![](images/1.png) 
+![](images/2.png) 
+![](images/3.png) 
+![](images/4.png)
+![](images/5.png)
+![](images/6.png)
 
 <br />
 <br />
