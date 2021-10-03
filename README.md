@@ -37,7 +37,7 @@ I emphasize that the database will respond to the contraints, but the user will 
 
 A very small database has been thought of as my first start in the web APIs, it would be a database that would be used by hospital receptionists.
 
-![](images/db eer.jpeg)
+![](images/dbEER.jpeg)
 
 As you can see, it will only give priority to doctors and nurses in this database, information on other types of workers will not be taken into account.
 
