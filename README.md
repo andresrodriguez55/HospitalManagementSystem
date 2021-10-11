@@ -1,3 +1,4 @@
+![Full Documentation](https://andresrodriguez55.github.io/#/post/8/Basic%20Hospital%20Management%20System%20Created%20With%20ASP.NET%20Core%20Blazor,%20Radzen%20Blazor%20Components%20And%20Entity%20Framework)
 
 ## Contents
 
